@@ -7,6 +7,11 @@
 [![Runtime: Bedrock AgentCore](https://img.shields.io/badge/Runtime-Bedrock_AgentCore-8C4FFF?style=for-the-badge&logo=amazonwebservices)](https://aws.amazon.com/bedrock/)
 [![Database: Amazon DynamoDB](https://img.shields.io/badge/Datastore-Amazon_DynamoDB-4053D6?style=for-the-badge&logo=amazondynamodb)](https://aws.amazon.com/dynamodb/)
 
+**🌐 Live Website:** [https://agentichr.sineix.com/](https://agentichr.sineix.com/)
+**☁️ AWS Live Deployment:** [http://agenthr-prod.eba-d3tr2asc.us-east-1.elasticbeanstalk.com/](http://agenthr-prod.eba-d3tr2asc.us-east-1.elasticbeanstalk.com/)
+
+![AgentHR Feature](Images/agentHR-feature.png)
+
 ---
 
 ![AgentHR Architecture](architecture.svg)
