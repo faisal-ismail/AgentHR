@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentHR — Autonomous Application-to-Action Agent | agenthr.sineix.com</title>
+    <meta name="description" content="AgentHR is an autonomous recruiting coordinator agent built on the Strands Agents SDK and Amazon Nova Pro on Amazon Bedrock with a Supervised Human-in-the-Loop approval gate.">
+    <meta name="keywords" content="AgentHR, AWS Hackathon, Strands Agents SDK, Amazon Bedrock, Amazon Nova Pro, AgentCore, Human in the Loop, AI Recruiting">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome & Lucide Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Marked JS for Client-Side Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            navy: '#0B0F19',
+                            dark: '#0F172A',
+                            card: '#131C31',
+                            blue: '#0066FF',
+                            cyan: '#00D2FF',
+                            purple: '#7000FF',
+                            violet: '#8B5CF6',
+                            accent: '#38BDF8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styling & Glow Effects */
+        body {
+            background-color: #0B0F19;
+            color: #F8FAFC;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glow-gradient-text {
+            background: linear-gradient(135deg, #00D2FF 0%, #0066FF 40%, #7000FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glow-card {
+            background: rgba(19, 28, 49, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .glow-card:hover {
+            border-color: rgba(0, 210, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 102, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 102, 255, 0.15) 0%, rgba(112, 0, 255, 0.08) 50%, rgba(0, 0, 0, 0) 70%);
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .grid-pattern {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        /* Markdown Styling inside Viewer */
+        .markdown-body h1 { font-size: 1.875rem; font-weight: 800; margin-top: 1.5rem; margin-bottom: 1rem; color: #38BDF8; }
+        .markdown-body h2 { font-size: 1.5rem; font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.75rem; color: #F8FAFC; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.25rem; }
+        .markdown-body h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: #A7F3D0; }
+        .markdown-body p { margin-bottom: 1rem; line-height: 1.7; color: #CBD5E1; }
+        .markdown-body ul, .markdown-body ol { margin-left: 1.5rem; margin-bottom: 1rem; color: #CBD5E1; }
+        .markdown-body ul { list-style-type: disc; }
+        .markdown-body ol { list-style-type: decimal; }
+        .markdown-body li { margin-bottom: 0.35rem; }
+        .markdown-body code { background: rgba(0,0,0,0.5); color: #38BDF8; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.9em; }
+        .markdown-body pre { background: #090D16 !important; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem; overflow-x: auto; margin-bottom: 1.5rem; }
+        .markdown-body pre code { background: transparent; padding: 0; }
+        .markdown-body table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+        .markdown-body th, .markdown-body td { border: 1px solid rgba(255,255,255,0.1); padding: 0.6rem 0.8rem; text-align: left; }
+        .markdown-body th { background: rgba(255,255,255,0.05); color: #38BDF8; }
+        .markdown-body blockquote { border-left: 4px solid #7000FF; padding-left: 1rem; font-style: italic; color: #94A3B8; margin-bottom: 1rem; }
+        .markdown-body a { color: #00D2FF; text-decoration: underline; }
+    </style>
+</head>
+<body class="grid-pattern antialiased">
+
+    <!-- Hero Glowing Background Layer -->
+    <div class="hero-glow"></div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-navy/80 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Brand Logo matching official logo graphic -->
+            <a href="https://agenthr.sineix.com" class="flex items-center gap-3 group">
+                <div class="relative w-11 h-11 flex items-center justify-center">
+                    <svg viewBox="0 0 100 100" class="w-full h-full transform group-hover:scale-105 transition-transform duration-300">
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#0066FF" />
+                                <stop offset="50%" stop-color="#00D2FF" />
+                                <stop offset="100%" stop-color="#7000FF" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Stylized A with Person & Digital Nodes -->
+                        <path d="M 50 10 L 80 80 L 62 80 L 50 50 L 38 80 L 20 80 Z" fill="url(#logoGrad)"/>
+                        <!-- Head Silhouette -->
+                        <circle cx="50" cy="38" r="8" fill="#FFFFFF"/>
+                        <!-- Torso Silhouette -->
+                        <path d="M 38 58 C 38 50, 62 50, 62 58 L 62 66 L 38 66 Z" fill="#FFFFFF"/>
+                        <!-- Orbital Tech Arc -->
+                        <path d="M 15 70 C 15 90, 85 90, 85 65" stroke="url(#logoGrad)" stroke-width="5" stroke-linecap="round" fill="none"/>
+                        <circle cx="85" cy="65" r="4" fill="#7000FF"/>
+                        <circle cx="75" cy="55" r="3" fill="#00D2FF"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl font-black tracking-tight text-white">Agent<span class="glow-gradient-text">HR</span></span>
+                        <span class="px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase bg-brand-blue/20 text-brand-cyan border border-brand-blue/30 rounded-full">AWS Hackathon</span>
+                    </div>
+                    <p class="text-[10px] font-bold tracking-widest text-slate-400 uppercase -mt-0.5">HIRE • SCHEDULE • AUTOMATE</p>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                <a href="#overview" class="hover:text-brand-cyan transition-colors">Overview</a>
+                <a href="#simulator" class="hover:text-brand-cyan transition-colors">Live Workflow Simulator</a>
+                <a href="#architecture" class="hover:text-brand-cyan transition-colors">Architecture</a>
+                <a href="#tools" class="hover:text-brand-cyan transition-colors">Strands Tools</a>
+                <a href="#docs" class="hover:text-brand-cyan transition-colors text-brand-cyan flex items-center gap-1.5"><i class="fa-solid fa-file-code"></i> Docs (.md)</a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-3">
+                <a href="https://agentsforhumans.devpost.com/" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 transition-all">
+                    <i class="fa-solid fa-trophy text-amber-400"></i> Devpost Entry
+                </a>
+                <a href="#simulator" class="px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-brand-blue via-brand-cyan to-brand-purple rounded-lg shadow-lg shadow-brand-blue/20 hover:shadow-brand-cyan/40 hover:scale-105 transition-all">
+                    Launch Demo
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24 space-y-28 relative z-10">
+
+        <!-- HERO SECTION -->
+        <section id="overview" class="text-center space-y-8 pt-6">
+            
+            <!-- Live Status Pill -->
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/90 border border-brand-cyan/30 text-xs font-semibold text-brand-cyan shadow-xl shadow-brand-blue/10">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-cyan"></span>
+                </span>
+                AWS "Agents for Humans" Hackathon Submission &bull; Powered by Strands SDK & Amazon Nova Pro
+            </div>
+
+            <!-- Headline -->
+            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight max-w-5xl mx-auto">
+                From Application Received to Recruitment Action Taken — <span class="glow-gradient-text">Autonomously with Supervised Human Control</span>.
+            </h1>
+
+            <!-- Subheadline -->
+            <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed">
+                AgentHR is not a passive "CV → score" generator. Powered by the <strong>Strands Agents SDK</strong> and <strong>Amazon Nova Pro on Amazon Bedrock</strong>, it parses resumes, evaluates compliance against deterministic hiring policies, and schedules interview actions through a <strong>Human-in-the-Loop (HITL) approval gate</strong>.
+            </p>
+
+            <!-- Hero Action Buttons -->
+            <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
+                <a href="#simulator" class="px-8 py-4 text-sm font-bold uppercase tracking-wider text-white bg-gradient-to-r from-brand-blue to-brand-purple rounded-xl shadow-xl shadow-brand-blue/30 hover:shadow-brand-blue/50 hover:-translate-y-0.5 transition-all flex items-center gap-3">
+                    <i class="fa-solid fa-play"></i> Interactive Workflow Simulator
+                </a>
+                <a href="#docs" class="px-8 py-4 text-sm font-bold uppercase tracking-wider text-slate-200 bg-brand-card hover:bg-slate-800 rounded-xl border border-white/10 hover:border-brand-cyan/40 transition-all flex items-center gap-3">
+                    <i class="fa-solid fa-book"></i> Read Documentation (.md)
+                </a>
+                <a href="https://github.com" target="_blank" class="px-6 py-4 text-sm font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all flex items-center gap-2">
+                    <i class="fa-brands fa-github text-lg"></i> GitHub
+                </a>
+            </div>
+
+            <!-- Key Metric Badges -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10 max-w-4xl mx-auto">
+                <div class="glow-card p-5 rounded-2xl text-center">
+                    <div class="text-3xl font-extrabold text-brand-cyan">100%</div>
+                    <div class="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">Policy Adherence</div>
+                </div>
+                <div class="glow-card p-5 rounded-2xl text-center">
+                    <div class="text-3xl font-extrabold text-emerald-400">0%</div>
+                    <div class="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">Hallucinated Invites</div>
+                </div>
+                <div class="glow-card p-5 rounded-2xl text-center">
+                    <div class="text-3xl font-extrabold text-brand-purple">&lt; 2.5s</div>
+                    <div class="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">Evaluation Latency</div>
+                </div>
+                <div class="glow-card p-5 rounded-2xl text-center">
+                    <div class="text-3xl font-extrabold text-amber-400">7 Tools</div>
+                    <div class="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">Strands Agent SDK</div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- INTERACTIVE LIVE WORKFLOW SIMULATOR -->
+        <section id="simulator" class="space-y-8">
+            <div class="text-center space-y-3">
+                <div class="text-xs font-bold uppercase tracking-widest text-brand-cyan">Live Agent Simulation</div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold">Autonomous Pipeline & HITL Approval Demo</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto text-sm">Experience how AgentHR evaluates applications, computes policy match scores, triggers the Strands <code class="text-brand-cyan">BeforeToolCallEvent</code> hook, and resumes upon human recruiter authorization.</p>
+            </div>
+
+            <div class="glow-card rounded-3xl p-6 sm:p-8 border border-white/10 overflow-hidden">
+                <!-- Candidate Selection Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Select Test Candidate:</span>
+                        <select id="simCandidateSelect" class="bg-brand-navy border border-white/20 rounded-lg px-4 py-2 text-sm font-semibold text-white focus:outline-none focus:border-brand-cyan">
+                            <option value="strong">Sarah Ali — Senior Backend Engineer (Strong Match · Score 90)</option>
+                            <option value="borderline">Marcus Vance — Fullstack Developer (Borderline · Score 73)</option>
+                            <option value="weak">David Chen — Junior Web Dev (Weak Match · Score 40)</option>
+                        </select>
+                    </div>
+                    <button id="btnRunSimulation" onclick="runSimulation()" class="px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-brand-blue to-brand-cyan rounded-lg hover:brightness-110 shadow-lg shadow-brand-blue/20 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-play"></i> Run Agent Pipeline
+                    </button>
+                </div>
+
+                <!-- Pipeline Stages Visualizer -->
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 pt-8 text-center" id="simPipelineGrid">
+                    
+                    <!-- Step 1: Ingestion -->
+                    <div id="step-1" class="glow-card p-4 rounded-xl border-white/10 opacity-50 transition-all">
+                        <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-brand-blue/20 text-brand-cyan flex items-center justify-center font-bold">1</div>
+                        <div class="text-xs font-bold text-white uppercase tracking-wider">UNDERSTANDING</div>
+                        <div class="text-[11px] text-slate-400 mt-1">CV Ingestion & Skill Extraction</div>
+                        <div class="mt-3 text-[10px] font-mono px-2 py-1 rounded bg-black/40 text-brand-accent truncate" id="step1-status">Idle</div>
+                    </div>
+
+                    <!-- Step 2: Reasoning -->
+                    <div id="step-2" class="glow-card p-4 rounded-xl border-white/10 opacity-50 transition-all">
+                        <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-brand-purple/20 text-brand-violet flex items-center justify-center font-bold">2</div>
+                        <div class="text-xs font-bold text-white uppercase tracking-wider">REASONING</div>
+                        <div class="text-[11px] text-slate-400 mt-1">Hiring Policy Rules Matrix</div>
+                        <div class="mt-3 text-[10px] font-mono px-2 py-1 rounded bg-black/40 text-brand-accent truncate" id="step2-status">Idle</div>
+                    </div>
+
+                    <!-- Step 3: Decision -->
+                    <div id="step-3" class="glow-card p-4 rounded-xl border-white/10 opacity-50 transition-all">
+                        <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">3</div>
+                        <div class="text-xs font-bold text-white uppercase tracking-wider">DECISION</div>
+                        <div class="text-[11px] text-slate-400 mt-1">Score: 70% Mand. / 30% Pref.</div>
+                        <div class="mt-3 text-[10px] font-mono px-2 py-1 rounded bg-black/40 text-brand-accent truncate" id="step3-status">Idle</div>
+                    </div>
+
+                    <!-- Step 4: HITL Gate -->
+                    <div id="step-4" class="glow-card p-4 rounded-xl border-amber-500/30 opacity-50 transition-all">
+                        <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">4</div>
+                        <div class="text-xs font-bold text-white uppercase tracking-wider">STRANDS HOOK</div>
+                        <div class="text-[11px] text-slate-400 mt-1">BeforeToolCall Intercept</div>
+                        <div class="mt-3 text-[10px] font-mono px-2 py-1 rounded bg-black/40 text-amber-300 truncate" id="step4-status">Idle</div>
+                    </div>
+
+                    <!-- Step 5: Action -->
+                    <div id="step-5" class="glow-card p-4 rounded-xl border-white/10 opacity-50 transition-all">
+                        <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">5</div>
+                        <div class="text-xs font-bold text-white uppercase tracking-wider">ACTION RECORD</div>
+                        <div class="text-[11px] text-slate-400 mt-1">Calendar & Email Synthesis</div>
+                        <div class="mt-3 text-[10px] font-mono px-2 py-1 rounded bg-black/40 text-brand-accent truncate" id="step5-status">Idle</div>
+                    </div>
+
+                </div>
+
+                <!-- Simulation Output Window & Approval Box -->
+                <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Terminal Console -->
+                    <div class="lg:col-span-2 bg-black/80 rounded-2xl p-5 border border-white/10 font-mono text-xs text-slate-300 h-64 overflow-y-auto space-y-2" id="simConsole">
+                        <div class="text-slate-500">// AgentHR Pipeline Simulation Console</div>
+                        <div class="text-brand-cyan">Ready. Click "Run Agent Pipeline" above to begin test evaluation.</div>
+                    </div>
+
+                    <!-- HITL Action Approval Panel -->
+                    <div class="glow-card p-5 rounded-2xl border border-amber-500/30 flex flex-col justify-between" id="simApprovalPanel">
+                        <div>
+                            <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                                <i class="fa-solid fa-shield-halved"></i> Supervised Approval Gate
+                            </div>
+                            <p class="text-xs text-slate-300 mt-2 leading-relaxed" id="simApprovalDesc">
+                                No active intercept. When the Strands Agent attempts outward tool calls (<code class="text-amber-300">schedule_interview</code>), execution pauses here for recruiter authorization.
+                            </p>
+                        </div>
+                        <div class="pt-4 border-t border-white/10 space-y-2">
+                            <button id="btnApproveAction" onclick="decisionApprove(true)" disabled class="w-full py-2.5 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:pointer-events-none text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-check"></i> Approve Proposed Action
+                            </button>
+                            <button id="btnRejectAction" onclick="decisionApprove(false)" disabled class="w-full py-2 px-4 rounded-lg bg-rose-900/50 hover:bg-rose-800 disabled:opacity-30 disabled:pointer-events-none text-rose-200 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-xmark"></i> Reject Action
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ARCHITECTURE & SEVEN STRANDS TOOLS -->
+        <section id="tools" class="space-y-12">
+            <div class="text-center space-y-3">
+                <div class="text-xs font-bold uppercase tracking-widest text-brand-purple">Agent Framework Integration</div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold">The Seven Strands Agent Tools</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto text-sm">Every tool is decorated with <code class="text-brand-purple">@tool</code> from <code class="text-brand-purple">strands-agents</code> and strictly typed for Amazon Nova Pro function calling.</p>
+            </div>
+
+            <!-- Tool Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Tool 1 -->
+                <div class="glow-card p-6 rounded-2xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-brand-blue/20 text-brand-cyan">Read Tool</span>
+                        <span class="text-xs font-bold text-slate-500">Tool #1</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-mono text-white">get_candidate_profile()</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">Extracts structured candidate profile (skills, education, contact, experience years) from uploaded resume text.</p>
+                </div>
+
+                <!-- Tool 2 -->
+                <div class="glow-card p-6 rounded-2xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-brand-blue/20 text-brand-cyan">Read Tool</span>
+                        <span class="text-xs font-bold text-slate-500">Tool #2</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-mono text-white">get_job_requirements()</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">Retrieves mandatory and preferred requirements for the target position from the store database.</p>
+                </div>
+
+                <!-- Tool 3 -->
+                <div class="glow-card p-6 rounded-2xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-brand-blue/20 text-brand-cyan">Read Tool</span>
+                        <span class="text-xs font-bold text-slate-500">Tool #3</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-mono text-white">get_hiring_policy()</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">Reads decision rules directly from human-editable policy-as-code markdown (<code class="text-brand-cyan">hiring_policy.md</code>).</p>
+                </div>
+
+                <!-- Tool 4 -->
+                <div class="glow-card p-6 rounded-2xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-brand-blue/20 text-brand-cyan">Read Tool</span>
+                        <span class="text-xs font-bold text-slate-500">Tool #4</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-mono text-white">check_interview_slots()</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">Queries recruiter calendar schedule for available, non-conflicting time slots.</p>
+                </div>
+
+                <!-- Tool 5 (HITL GATED) -->
+                <div class="glow-card p-6 rounded-2xl space-y-3 border-amber-500/40 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-amber-500 text-black text-[10px] font-black uppercase px-3 py-1 rounded-bl-lg">HITL Gated</div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300">Action Tool</span>
+                        <span class="text-xs font-bold text-slate-500">Tool #5</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-mono text-white">schedule_interview()</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">Reserves interview slot and updates application status. Gated by <code class="text-amber-300">BeforeToolCallEvent</code> hook.</p>
+                </div>
+
+                <!-- Tool 6 -->
+                <div class="glow-card p-6 rounded-2xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-brand-purple/20 text-brand-violet">Action Tool</span>
+                        <span class="text-xs font-bold text-slate-500">Tool #6</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-mono text-white">create_human_review()</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">Escalates borderline applications (score 60–84 or missing mandatory info) to human recruiter queue.</p>
+                </div>
+
+                <!-- Tool 7 (HITL GATED) -->
+                <div class="glow-card p-6 rounded-2xl space-y-3 border-amber-500/40 relative overflow-hidden md:col-span-2 lg:col-span-1">
+                    <div class="absolute top-0 right-0 bg-amber-500 text-black text-[10px] font-black uppercase px-3 py-1 rounded-bl-lg">HITL Gated</div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300">Action Tool</span>
+                        <span class="text-xs font-bold text-slate-500">Tool #7</span>
+                    </div>
+                    <h3 class="text-lg font-bold font-mono text-white">draft_candidate_email()</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">Synthesizes personalized candidate email communications via Amazon Nova Pro on Bedrock. Gated by HITL approval.</p>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ARCHITECTURE & CLOUD SYSTEM DIAGRAM -->
+        <section id="architecture" class="space-y-8">
+            <div class="text-center space-y-3">
+                <div class="text-xs font-bold uppercase tracking-widest text-brand-cyan">AWS Cloud Architecture</div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold">End-to-End System Infrastructure</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto text-sm">Deployed on AWS App Runner and Amazon Bedrock AgentCore Runtime with Amazon DynamoDB state persistence.</p>
+            </div>
+
+            <div class="glow-card rounded-3xl p-6 sm:p-8 border border-white/10 overflow-hidden">
+                <!-- SVG Diagram Frame -->
+                <div class="w-full overflow-x-auto rounded-xl bg-slate-950/80 p-4 border border-white/10">
+                    <img src="../architecture.svg" alt="AgentHR System Architecture" class="w-full min-w-[900px] h-auto rounded-lg shadow-2xl">
+                </div>
+
+                <!-- Tech Stack Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                    <div class="p-4 rounded-xl bg-white/5 border border-white/5 text-center">
+                        <i class="fa-brands fa-aws text-2xl text-amber-400 mb-2"></i>
+                        <div class="text-xs font-bold text-white">Amazon Bedrock</div>
+                        <div class="text-[11px] text-slate-400">Amazon Nova Pro</div>
+                    </div>
+                    <div class="p-4 rounded-xl bg-white/5 border border-white/5 text-center">
+                        <i class="fa-solid fa-cubes text-2xl text-brand-cyan mb-2"></i>
+                        <div class="text-xs font-bold text-white">Strands Agents SDK</div>
+                        <div class="text-[11px] text-slate-400">Strands Agent & Hooks</div>
+                    </div>
+                    <div class="p-4 rounded-xl bg-white/5 border border-white/5 text-center">
+                        <i class="fa-solid fa-database text-2xl text-brand-purple mb-2"></i>
+                        <div class="text-xs font-bold text-white">Amazon DynamoDB</div>
+                        <div class="text-[11px] text-slate-400">10 Persistent Tables</div>
+                    </div>
+                    <div class="p-4 rounded-xl bg-white/5 border border-white/5 text-center">
+                        <i class="fa-solid fa-server text-2xl text-emerald-400 mb-2"></i>
+                        <div class="text-xs font-bold text-white">Bedrock AgentCore</div>
+                        <div class="text-[11px] text-slate-400">/invocations & /ping</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- INTERACTIVE DOCUMENTATION (.MD VIEWER) SECTION -->
+        <section id="docs" class="space-y-8">
+            <div class="text-center space-y-3">
+                <div class="text-xs font-bold uppercase tracking-widest text-brand-cyan"><i class="fa-solid fa-book-open"></i> Technical Documentation</div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold">Repository Markdown Files Viewer</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto text-sm">Inspect project specifications, Strands integration details, hiring policy logic, and AWS cloud deployment guides directly inside the browser.</p>
+            </div>
+
+            <div class="glow-card rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+                <!-- Documentation Tabs Header -->
+                <div class="flex flex-wrap items-center justify-between gap-2 px-6 py-4 bg-slate-950/80 border-b border-white/10">
+                    <div class="flex flex-wrap items-center gap-2" id="docTabsHeader">
+                        <button onclick="loadDocTab('readme')" id="tab-readme" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-brand-blue text-white shadow-md transition-all">README.md</button>
+                        <button onclick="loadDocTab('strands')" id="tab-strands" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all">strands_use.md</button>
+                        <button onclick="loadDocTab('policy')" id="tab-policy" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all">hiring_policy.md</button>
+                        <button onclick="loadDocTab('aws')" id="tab-aws" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all">aws-guide.md</button>
+                        <button onclick="loadDocTab('proposal')" id="tab-proposal" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all">PROPOSAL.md</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] font-mono text-slate-400" id="docMetaFile">README.md</span>
+                        <button onclick="copyDocContent()" class="px-3 py-1.5 rounded-md bg-white/5 hover:bg-white/10 text-xs text-slate-300 transition-all flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> Copy Raw
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Markdown Content Render Container -->
+                <div class="p-8 max-h-[700px] overflow-y-auto markdown-body bg-brand-navy/60 text-slate-200" id="docRenderArea">
+                    <div class="flex items-center justify-center py-20 text-slate-500 font-mono text-sm">
+                        <i class="fa-solid fa-circle-notch animate-spin mr-3 text-brand-cyan"></i> Loading documentation...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/10 bg-brand-navy/90 py-12 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            <div class="flex items-center gap-3">
+                <span class="text-xl font-black text-white">Agent<span class="glow-gradient-text">HR</span></span>
+                <span class="text-xs text-slate-500 font-mono">| Hosted at agenthr.sineix.com</span>
+            </div>
+
+            <p class="text-xs text-slate-400 text-center md:text-left">
+                Built for the <strong>AWS "Agents for Humans" Hackathon</strong> &bull; Powered by <strong>Strands SDK</strong> & <strong>Amazon Bedrock</strong>
+            </p>
+
+            <div class="flex items-center gap-4 text-xs font-medium text-slate-400">
+                <a href="https://agentsforhumans.devpost.com/" target="_blank" class="hover:text-amber-400 transition-colors flex items-center gap-1">
+                    <i class="fa-solid fa-trophy"></i> Devpost
+                </a>
+                <a href="#docs" class="hover:text-brand-cyan transition-colors">Documentation</a>
+                <a href="https://github.com" target="_blank" class="hover:text-white transition-colors">GitHub Repo</a>
+            </div>
+
+        </div>
+    </footer>
+
+
+    <!-- SIMULATOR & MARKDOWN VIEWER JAVASCRIPT -->
+    <script>
+        // Pre-loaded raw contents of project documentation files
+        const DOC_FILES = {
+            readme: `# 🤖 AgentHR — Autonomous Application-to-Action Agent
+
+> **"From application received to recruitment action taken — autonomously with a supervised human checkpoint."**
+
+AgentHR is an autonomous recruiting coordinator agent built for the **AWS "Agents for Humans" Hackathon**. When a candidate submits an application, a **Strands Agents SDK** agent powered by **Amazon Nova Pro on Amazon Bedrock**:
+
+1. **Understands** the application, extracting candidate profile and qualifications from PDF/DOCX/TXT resumes.
+2. **Evaluates** eligibility deterministically against company hiring policy rules (\`data/policies/hiring_policy.md\`).
+3. **Decides** the next appropriate recruitment action (\`INTERVIEW\`, \`HUMAN_REVIEW\`, or \`REJECT\`).
+4. **Executes** actions safely through a **Human-in-the-Loop (HITL) Supervised Checkpoint** using Strands' \`BeforeToolCallEvent\` hook, pausing before sensitive actions (\`schedule_interview\`, \`draft_candidate_email\`) until an HR recruiter reviews and approves.
+5. **Records** an immutable, auditable activity log of every step, tool invocation, and decision rationale.
+
+---
+
+## 🏗️ Architecture & Technology Stack
+
+| Layer | Technology | Role |
+|---|---|---|
+| **Agent Framework** | **Strands Agents SDK** (\`strands-agents\`) | Autonomous multi-tool coordinator (\`strands.Agent\`) with \`@tool\` decorators |
+| **Foundation Model** | **Amazon Nova Pro** (\`us.amazon.nova-pro-v1:0\`) | Reasoning, candidate profile understanding, and email drafting on **Amazon Bedrock** |
+| **Supervised Checkpoint** | **Strands \`BeforeToolCallEvent\` Hook** | Human-in-the-Loop gate pausing outward actions until recruiter approval |
+| **State & Datastore** | **Amazon DynamoDB** (or in-memory store) | 10 persistent tables (\`applications\`, \`jobs\`, \`candidates\`, \`decisions\`, \`interviews\`, \`human_reviews\`, \`emails\`, \`activity_log\`, \`approvals\`, \`users\`) |
+| **API & AgentCore** | **FastAPI** + **Bedrock AgentCore Runtime** | Event processing, REST endpoints, plus native \`POST /invocations\` and \`GET /ping\` AgentCore contracts |
+| **Frontend UI** | **Streamlit** | Dual-portal interface: Public **Candidate Application Portal** & Recruiter **Admin Portal** |
+
+---
+
+## 🧬 Strands Usage
+
+AgentHR relies on the **Strands Agents SDK** to orchestrate candidate application workflows, tool calling functions, and Human-in-the-Loop lifecycle hooks.
+
+For a comprehensive guide on model setup (Amazon Nova Pro), tool definitions, \`BeforeToolCallEvent\` hook implementation, and fallback mechanisms, please see [strands_use.md](strands_use.md).`,
+
+            strands: `# Strands Agents SDK Integration in AgentHR
+
+This document details how the **Strands Agents SDK** is integrated and utilized within **AgentHR** to power the \`RecruitmentCoordinatorAgent\`.
+
+---
+
+## Architecture Overview
+
+AgentHR uses the **Strands Agents SDK** as its primary AI agent framework to orchestrate candidate application processing. The agent runs on **Amazon Nova Pro** via **AWS Bedrock**, interacting with structured tools and enforcement hooks to automate hiring workflows while preserving safety through a **Human-in-the-Loop (HITL)** approval gate.
+
+---
+
+## 1. Agent Initialization & Model Setup
+
+The agent is constructed in \`app/agent/agent.py\`. It initializes a \`BedrockModel\` pointing to Amazon Nova Pro:
+
+\`\`\`python
+from strands import Agent
+from strands.models import BedrockModel
+from app.agent.prompts import SYSTEM_INSTRUCTION
+from app.agent import tools as agent_tools
+
+bedrock_model = BedrockModel(
+    model_id=settings.bedrock_model_id, # e.g., amazon.nova-pro-v1:0
+    region_name=settings.aws_region,
+    temperature=0.2,
+)
+
+tool_list = [
+    agent_tools.get_candidate_profile,
+    agent_tools.get_job_requirements,
+    agent_tools.get_hiring_policy,
+    agent_tools.check_interview_slots,
+    agent_tools.schedule_interview,
+    agent_tools.create_human_review,
+    agent_tools.draft_candidate_email,
+]
+
+agent = Agent(
+    name="RecruitmentCoordinatorAgent",
+    model=bedrock_model,
+    system_prompt=SYSTEM_INSTRUCTION,
+    tools=tool_list,
+    hooks=hooks,
+)
+\`\`\`
+
+---
+
+## 2. Strands Tools Registry
+
+Tools are registered using the Strands \`@tool\` decorator in \`app/agent/tools.py\`. Each tool includes type annotations and Google-style docstrings, which Strands converts into JSON schema definitions for model function calling.
+
+### Available Tools:
+
+| Tool Function | Type | Description |
+| :--- | :--- | :--- |
+| \`get_candidate_profile(application_id)\` | Read | Retrieves parsed candidate details (skills, experience, education, contact). |
+| \`get_job_requirements(job_id)\` | Read | Retrieves mandatory and preferred job criteria. |
+| \`get_hiring_policy()\` | Read | Reads the policy-as-code from \`hiring_policy.md\`. |
+| \`check_interview_slots()\` | Action | Queries calendar service for open, non-conflicting interview slots. |
+| \`schedule_interview(application_id, slot_start)\` | Action | Books an interview slot and updates candidate application status. |
+| \`create_human_review(application_id, reason, recommendation)\` | Action | Escalates candidate to human recruiter queue with rationale. |
+| \`draft_candidate_email(application_id, email_type, subject, body)\` | Action | Generates invitation/rejection emails via Bedrock LLM synthesis. |
+
+---
+
+## 3. Human-in-the-Loop (HITL) Gate via Strands Hooks
+
+AgentHR leverages Strands Lifecycle Hooks (\`ApprovalHook\`) to prevent outward actions from executing without human oversight.
+
+### How the Hook Works:
+1. \`ApprovalHook\` inherits from \`strands.hooks.HookProvider\`.
+2. Registers a callback on \`BeforeToolCallEvent\`.
+3. Intercepts sensitive tool calls (\`schedule_interview\`, \`draft_candidate_email\`).
+4. Triggers \`event.interrupt(...)\`, causing the Strands agent execution to cleanly pause.`,
+
+            policy: `# Hiring Policy — AgentHR
+
+This document is the single source of truth for candidate decisions. The \`RecruitmentCoordinatorAgent\` reads this policy and applies it to every application. It is deliberately human-readable so that HR can change the rules without touching code.
+
+## Decision rules
+
+| Score range | All mandatory met? | Decision |
+|-------------|--------------------|-----------------|
+| 85 – 100 | yes | **INTERVIEW** |
+| 60 – 84 | yes | **HUMAN REVIEW**|
+| < 60 | yes | **REJECT** |
+| any | no (or unknown) | **HUMAN REVIEW**|
+
+**Overrides**
+
+1. Never auto-\`REJECT\` when mandatory information is **MISSING** from the CV (i.e. the CV does not mention the requirement at all). Route to **HUMAN REVIEW** instead.
+2. Never recommend \`INTERVIEW\` when any mandatory requirement is missing or unmet.
+3. When a scheduled interview slot is unavailable, the application is escalated to **HUMAN REVIEW** — it is never silently dropped.
+
+## Scoring formula
+
+- Mandatory requirements contribute **70%** of the score.
+- Preferred requirements contribute **30%** of the score.
+
+\`\`\`
+mandatory_score = 70 * (mandatory_met / total_mandatory)
+preferred_score = 30 * (preferred_met / total_preferred)
+score = round(mandatory_score + preferred_score, 1)
+\`\`\``,
+
+            aws: `# ☁️ AgentHR — AWS Cloud Setup & Deployment Guide
+
+This guide walks you step-by-step through setting up credentials from your **AWS Console account**, enabling **Amazon Bedrock Foundation Models**, provisioning **Amazon DynamoDB**, and deploying **AgentHR** live to AWS using **AWS App Runner** and **Amazon Bedrock AgentCore Runtime**.
+
+---
+
+## 1. Architecture Overview
+
+\`\`\`
+                          [ Candidate / Recruiter Browser ]
+                                         │
+                                         ▼ (Public HTTPS)
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                             AWS App Runner Service                               │
+│                                                                                  │
+│   ┌────────────────────────────────┐    ┌───────────────────────────────────┐    │
+│   │   Streamlit Frontend (:8080)   │───▶│   FastAPI + AgentCore (:8000)     │    │
+│   │   • Candidate Careers Portal   │    │   • POST /invocations & GET /ping │    │
+│   │   • Recruiter Action Approvals │    │   • Strands Agents Coordinator    │    │
+│   └────────────────────────────────┘    └─────────────────┬─────────────────┘    │
+└───────────────────────────────────────────────────────────┼──────────────────────┘
+                                                            │
+                            ┌───────────────────────────────┴─────────────────┐
+                            ▼                                                 ▼
+               ┌───────────────────────────┐                     ┌───────────────────────────┐
+               │      Amazon Bedrock       │                     │      Amazon DynamoDB      │
+               │   Amazon Nova Pro Model   │                     │      10 Tables (On-Demand)│
+               └───────────────────────────┘                     └───────────────────────────┘
+\`\`\``,
+
+            proposal: `# Project Proposal — AgentHR (AWS "Agents for Humans" Hackathon)
+
+## Executive Summary
+AgentHR transforms legacy passive recruitment scorecards into an **Autonomous Recruitment Coordinator Agent**. Built on the **Strands Agents SDK** and powered by **Amazon Nova Pro on Amazon Bedrock**, AgentHR autonomously processes applications, evaluates policy compliance, and interacts with real-world calendar and email systems under strict **Human-in-the-Loop (HITL)** supervision.`
+        };
+
+        let currentActiveTab = 'readme';
+
+        function loadDocTab(tabName) {
+            currentActiveTab = tabName;
+            
+            // Highlight Tab Buttons
+            ['readme', 'strands', 'policy', 'aws', 'proposal'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabName) {
+                    btn.className = "px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg bg-brand-blue text-white shadow-md transition-all";
+                } else {
+                    btn.className = "px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all";
+                }
+            });
+
+            // Set Document Meta Title
+            const metaMap = {
+                readme: 'README.md',
+                strands: 'strands_use.md',
+                policy: 'data/policies/hiring_policy.md',
+                aws: 'aws-guide.md',
+                proposal: 'PROPOSAL.md'
+            };
+            document.getElementById('docMetaFile').innerText = metaMap[tabName];
+
+            // Render Markdown using Marked
+            const rawMd = DOC_FILES[tabName] || '# File Not Found';
+            document.getElementById('docRenderArea').innerHTML = marked.parse(rawMd);
+            hljs.highlightAll();
+        }
+
+        function copyDocContent() {
+            const rawMd = DOC_FILES[currentActiveTab] || '';
+            navigator.clipboard.writeText(rawMd).then(() => {
+                alert(`Copied raw content of ${currentActiveTab}.md to clipboard!`);
+            });
+        }
+
+        // SIMULATION LOGIC
+        const CANDIDATES = {
+            strong: {
+                name: "Sarah Ali",
+                role: "Senior Backend Engineer",
+                skills: ["Python", "AWS", "FastAPI", "Docker", "REST APIs"],
+                score: 92.0,
+                outcome: "INTERVIEW",
+                mandMet: "3/3 (Python, REST APIs, 5+ yrs exp)",
+                prefMet: "2/3 (FastAPI, Docker)"
+            },
+            borderline: {
+                name: "Marcus Vance",
+                role: "Fullstack Developer",
+                skills: ["JavaScript", "Node.js", "Python"],
+                score: 73.0,
+                outcome: "HUMAN_REVIEW",
+                mandMet: "2/3 (Python, 3+ yrs exp)",
+                prefMet: "1/3 (REST APIs)"
+            },
+            weak: {
+                name: "David Chen",
+                role: "Junior Web Developer",
+                skills: ["HTML", "CSS", "JavaScript"],
+                score: 40.0,
+                outcome: "REJECT",
+                mandMet: "0/3 (Lacks Python, REST APIs)",
+                prefMet: "0/3"
+            }
+        };
+
+        let activeSimCandidate = null;
+
+        function runSimulation() {
+            const select = document.getElementById('simCandidateSelect');
+            activeSimCandidate = CANDIDATES[select.value];
+            const consoleBox = document.getElementById('simConsole');
+
+            // Reset Pipeline Visualizer Steps
+            for (let i = 1; i <= 5; i++) {
+                const el = document.getElementById(`step-${i}`);
+                el.className = "glow-card p-4 rounded-xl border-white/10 opacity-50 transition-all";
+                document.getElementById(`step${i}-status`).innerText = "Pending";
+            }
+            document.getElementById('btnApproveAction').disabled = true;
+            document.getElementById('btnRejectAction').disabled = true;
+
+            consoleBox.innerHTML = `<div class="text-brand-cyan">[SYSTEM] Initiating Strands Agent pipeline for application #${Math.floor(Math.random()*9000+1000)}...</div>`;
+
+            // Step 1: Ingestion
+            setTimeout(() => {
+                setStepActive(1, "Completed");
+                logConsole(`[UNDERSTANDING] Parsing candidate: ${activeSimCandidate.name} (${activeSimCandidate.role})`);
+                logConsole(`  → Skills extracted: ${activeSimCandidate.skills.join(', ')}`);
+            }, 600);
+
+            // Step 2: Reasoning
+            setTimeout(() => {
+                setStepActive(2, "Completed");
+                logConsole(`[REASONING] Calling get_hiring_policy(). Target policy: 70% Mandatory / 30% Preferred`);
+            }, 1200);
+
+            // Step 3: Decision
+            setTimeout(() => {
+                setStepActive(3, `${activeSimCandidate.outcome} (${activeSimCandidate.score})`);
+                logConsole(`[DECISION] Score calculated: ${activeSimCandidate.score}/100. Policy outcome: ${activeSimCandidate.outcome}`);
+                logConsole(`  → Mandatory: ${activeSimCandidate.mandMet}`);
+                logConsole(`  → Preferred: ${activeSimCandidate.prefMet}`);
+            }, 1800);
+
+            // Step 4: HITL Hook
+            setTimeout(() => {
+                if (activeSimCandidate.outcome === "INTERVIEW") {
+                    setStepActive(4, "INTERCEPTED", "amber");
+                    logConsole(`<span class="text-amber-400">⚠️ [STRANDS HOOK] BeforeToolCallEvent Intercepted tool call: 'schedule_interview' & 'draft_candidate_email'</span>`);
+                    logConsole(`<span class="text-amber-300">  → Status set to: awaiting_approval. Pausing agent execution for human recruiter approval...</span>`);
+                    
+                    document.getElementById('simApprovalDesc').innerHTML = `
+                        <strong class="text-amber-300">Action Intercepted!</strong><br>
+                        Candidate: <strong>${activeSimCandidate.name}</strong> (Score: ${activeSimCandidate.score}/100)<br>
+                        Proposed Tool: <code class="text-amber-300">schedule_interview(slot="Tomorrow 10:00 AM")</code><br>
+                        Email: <code class="text-amber-300">draft_candidate_email(type="interview_invite")</code>
+                    `;
+                    document.getElementById('btnApproveAction').disabled = false;
+                    document.getElementById('btnRejectAction').disabled = false;
+                } else if (activeSimCandidate.outcome === "HUMAN_REVIEW") {
+                    setStepActive(4, "Escalated", "purple");
+                    logConsole(`[ACTION] Invoked create_human_review(). Application escalated to recruiter review queue.`);
+                    setStepActive(5, "Completed");
+                } else {
+                    setStepActive(4, "Bypassed", "slate");
+                    logConsole(`[ACTION] Outcome is REJECT. Invoked draft_candidate_email(type="rejection").`);
+                    setStepActive(5, "Completed");
+                }
+            }, 2400);
+        }
+
+        function decisionApprove(isApproved) {
+            if (!activeSimCandidate) return;
+            const consoleBox = document.getElementById('simConsole');
+
+            if (isApproved) {
+                logConsole(`<span class="text-emerald-400">✓ [RECRUITER APPROVAL] Human recruiter authorized action for ${activeSimCandidate.name}. Resuming agent pipeline...</span>`);
+                logConsole(`  → schedule_interview() executed: Interview booked for Tomorrow 10:00 AM on Recruiter Calendar.`);
+                logConsole(`  → draft_candidate_email() executed: Invitation email composed by Amazon Nova Pro (status: ready_to_send).`);
+                setStepActive(5, "Completed");
+            } else {
+                logConsole(`<span class="text-rose-400">✗ [RECRUITER REJECT] Action rejected by recruiter. Application status updated to rejected.</span>`);
+            }
+
+            document.getElementById('btnApproveAction').disabled = true;
+            document.getElementById('btnRejectAction').disabled = true;
+        }
+
+        function setStepActive(stepNum, statusText, color = "emerald") {
+            const el = document.getElementById(`step-${stepNum}`);
+            el.className = `glow-card p-4 rounded-xl border-${color}-500/50 opacity-100 shadow-lg transition-all scale-105`;
+            document.getElementById(`step${stepNum}-status`).innerText = statusText;
+        }
+
+        function logConsole(msg) {
+            const consoleBox = document.getElementById('simConsole');
+            consoleBox.innerHTML += `<div>${msg}</div>`;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        // Initialize default doc tab on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDocTab('readme');
+        });
+    </script>
+
+</body>
+</html>

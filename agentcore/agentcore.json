@@ -1,0 +1,22 @@
+{
+  "name": "agenthr",
+  "version": "1.0.0",
+  "description": "AgentHR - Autonomous Recruiting Coordinator with Supervised Checkpoints (Strands Agents SDK on Amazon Bedrock AgentCore Runtime)",
+  "runtime": {
+    "type": "container",
+    "imagePort": 8080,
+    "endpoints": {
+      "invocations": "/invocations",
+      "healthCheck": "/ping"
+    }
+  },
+  "agent": {
+    "name": "RecruitmentCoordinatorAgent",
+    "framework": "strands-agents",
+    "model": {
+      "provider": "bedrock",
+      "modelId": "us.amazon.nova-pro-v1:0"
+    }
+  }
+}
+

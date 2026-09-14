@@ -1,0 +1,20 @@
+Ahmed Khan
+ahmed.khan@example.com
++92 300 1234567
+
+Summary
+Backend engineer with 5 years of experience building REST APIs in Python.
+
+Skills
+Python, REST APIs, FastAPI, Docker, Google Cloud, PostgreSQL, Kubernetes
+
+Experience
+Senior Backend Engineer — Acme Corp (2021-Present)
+- Designed and shipped REST APIs with FastAPI and Python.
+- Containerized services with Docker and deployed to Google Cloud (GKE).
+
+Backend Engineer — Globex (2019-2021)
+- Built Python microservices and PostgreSQL data models.
+
+Education
+B.Sc. Computer Science — University of Engineering (2015-2019)

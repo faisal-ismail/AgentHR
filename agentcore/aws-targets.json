@@ -1,0 +1,10 @@
+{
+  "targets": [
+    {
+      "name": "default",
+      "region": "us-east-1",
+      "runtimeRoleArn": "arn:aws:iam::123456789012:role/AgentCoreRuntimeRole"
+    }
+  ]
+}
+

@@ -1,0 +1,19 @@
+Sara Ali
+sara.ali@example.com
++92 321 9876543
+
+Summary
+Backend developer with 3 years of Python experience building REST APIs.
+
+Skills
+Python, REST APIs, SQL, PostgreSQL
+
+Experience
+Backend Developer — TechCorp (2022-Present)
+- Built Python REST APIs and managed PostgreSQL databases.
+
+Junior Developer — SoftWorks (2020-2022)
+- Worked on Python web services.
+
+Education
+Bachelor of Computer Science — FAST University

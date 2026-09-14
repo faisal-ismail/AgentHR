@@ -1,0 +1,53 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 777 >>
+stream
+BT /F1 11 Tf 72 720 Td 14 TL
+(Ahmed Khan) Tj T*
+(ahmed.khan@example.com) Tj T*
+(+92 300 1234567) Tj T*
+() Tj T*
+(Summary) Tj T*
+(Backend engineer with 5 years of experience building REST APIs in Python.) Tj T*
+() Tj T*
+(Skills) Tj T*
+(Python, REST APIs, FastAPI, Docker, Google Cloud, PostgreSQL, Kubernetes) Tj T*
+() Tj T*
+(Experience) Tj T*
+(Senior Backend Engineer ? Acme Corp \(2021-Present\)) Tj T*
+(- Designed and shipped REST APIs with FastAPI and Python.) Tj T*
+(- Containerized services with Docker and deployed to Google Cloud \(GKE\).) Tj T*
+() Tj T*
+(Backend Engineer ? Globex \(2019-2021\)) Tj T*
+(- Built Python microservices and PostgreSQL data models.) Tj T*
+() Tj T*
+(Education) Tj T*
+(B.Sc. Computer Science ? University of Engineering \(2015-2019\)) Tj T*
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1139
+%%EOF

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="960" viewBox="0 0 1400 960">
+  <!-- Outer AWS Boundary -->
+  <rect x="30" y="30" width="1340" height="900" rx="16" fill="#f8fafc" stroke="#ff9900" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text x="1350" y="70" text-anchor="end" font-family="sans-serif" font-size="16" font-weight="bold" fill="#ff9900">AWS Cloud (Bedrock AgentCore &amp; App Runner)</text>
+  <text x="700" y="65" text-anchor="middle" font-family="sans-serif" font-size="32" font-weight="bold" fill="#0f172a">AgentHR — System Architecture</text>
+
+  <g font-family="sans-serif" text-anchor="middle">
+    <!-- Top Actors -->
+    <rect x="90" y="100" width="340" height="110" rx="12" fill="#0c1b2a"/>
+    <text x="260" y="138" fill="#ff9900" font-size="20" font-weight="bold">Candidate</text>
+    <text x="260" y="166" fill="#e2e8f0" font-size="13">browse open jobs · upload CV</text>
+    <text x="260" y="186" fill="#e2e8f0" font-size="13">submit application</text>
+
+    <rect x="970" y="100" width="340" height="110" rx="12" fill="#0c1b2a"/>
+    <text x="1140" y="138" fill="#ff9900" font-size="20" font-weight="bold">Recruiter (HR)</text>
+    <text x="1140" y="166" fill="#e2e8f0" font-size="13">post jobs · inspect agent trace</text>
+    <text x="1140" y="186" fill="#e2e8f0" font-size="13">authorize action approvals (HITL)</text>
+
+    <!-- Streamlit App -->
+    <rect x="340" y="250" width="720" height="130" rx="12" fill="#1e293b"/>
+    <text x="700" y="290" fill="#ff9900" font-size="22" font-weight="bold">Streamlit Frontend (Single Service, Two Portals)</text>
+    <text x="700" y="320" fill="#fff" font-size="14">Candidate Careers Portal  ·  HR Admin Dashboard &amp; Action Approvals</text>
+    <text x="700" y="342" fill="#94a3b8" font-size="12">Real-time candidate evaluation trace · calendar · reviews · emails</text>
+
+    <!-- FastAPI -->
+    <rect x="470" y="420" width="460" height="85" rx="12" fill="#0284c7"/>
+    <text x="700" y="452" fill="#fff" font-size="20" font-weight="bold">FastAPI REST &amp; AgentCore Engine</text>
+    <text x="700" y="478" fill="#e0f2fe" font-size="13">/invocations · /ping · /api/applications · /api/approvals · /api/jobs</text>
+
+    <!-- Strands Agents SDK Box -->
+    <rect x="80" y="550" width="600" height="340" rx="12" fill="#065f46"/>
+    <text x="380" y="585" fill="#a7f3d0" font-size="20" font-weight="bold">Strands Agents SDK — RecruitmentCoordinatorAgent</text>
+    <text x="380" y="612" fill="#ecfdf5" font-size="13">Model: Amazon Bedrock (Amazon Nova Pro)</text>
+    <text x="380" y="634" fill="#ecfdf5" font-size="12">Deterministic Scoring Engine (data/policies/hiring_policy.md)</text>
+
+    <rect x="105" y="650" width="550" height="220" rx="8" fill="#047857"/>
+    <text x="380" y="675" fill="#fff" font-size="14" font-weight="bold">Seven Strands Tools (@tool)</text>
+    <text x="380" y="700" fill="#e6fffa" font-size="12">get_candidate_profile · get_job_requirements · get_hiring_policy</text>
+    <text x="380" y="722" fill="#e6fffa" font-size="12">check_interview_slots · schedule_interview</text>
+    <text x="380" y="744" fill="#e6fffa" font-size="12">create_human_review · draft_candidate_email</text>
+
+    <!-- HITL Checkpoint Box -->
+    <rect x="125" y="770" width="510" height="85" rx="8" fill="#b45309" stroke="#fef3c7" stroke-width="2"/>
+    <text x="380" y="798" fill="#fff" font-size="14" font-weight="bold">⏸️ Human-in-the-Loop (HITL) Approval Gate</text>
+    <text x="380" y="820" fill="#fef3c7" font-size="12">BeforeToolCallEvent Hook intercepts schedule_interview &amp; draft_candidate_email</text>
+    <text x="380" y="838" fill="#fef3c7" font-size="11">Execution pauses until recruiter approves action via API or Admin UI</text>
+
+    <!-- DynamoDB -->
+    <rect x="740" y="550" width="580" height="240" rx="12" fill="#4c1d95"/>
+    <text x="1030" y="585" fill="#ddd6fe" font-size="20" font-weight="bold">Amazon DynamoDB Datastore</text>
+    <text x="1030" y="612" fill="#fff" font-size="13">Partition Key 'id' · Boto3 Resource Client</text>
+    
+    <rect x="765" y="630" width="530" height="140" rx="8" fill="#5b21b6"/>
+    <text x="1030" y="660" fill="#ede9fe" font-size="13">Tables: agenthr_jobs · agenthr_candidates · agenthr_applications</text>
+    <text x="1030" y="685" fill="#ede9fe" font-size="13">agenthr_decisions · agenthr_approvals (HITL) · agenthr_interviews</text>
+    <text x="1030" y="710" fill="#ede9fe" font-size="13">agenthr_human_reviews · agenthr_emails · agenthr_activity_log</text>
+    <text x="1030" y="735" fill="#ede9fe" font-size="13">agenthr_users (HR Admin Auth)</text>
+
+    <!-- Recruiter View -->
+    <rect x="740" y="810" width="580" height="80" rx="12" fill="#0f172a"/>
+    <text x="1030" y="845" fill="#ff9900" font-size="16" font-weight="bold">Interview Calendar &amp; Activity Log</text>
+    <text x="1030" y="870" fill="#94a3b8" font-size="12">Dynamic slot availability checking &amp; auditable step trace</text>
+
+    <!-- Connectors -->
+    <g stroke="#0f172a" stroke-width="2.5" fill="#0f172a">
+      <path d="M 260 210 L 500 248"/>
+      <path d="M 1140 210 L 900 248"/>
+      <path d="M 700 380 L 700 418"/>
+      <path d="M 600 505 L 420 548"/>
+      <path d="M 800 505 L 980 548"/>
+      <path d="M 680 670 L 738 670"/>
+      <path d="M 1030 790 L 1030 808"/>
+    </g>
+    <text x="710" y="662" font-size="12" font-weight="bold" fill="#64748b">read/write</text>
+  </g>
+</svg>
+
